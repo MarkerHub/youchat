@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公众号：MarkerHub</title>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<div style="text-align: center;">
+
+    <p>当前用户：<strong>${username}</strong></p>
+
+    <br>
+    <hr>
+    <br>
+    经纬度：
+    <input type="text" id="ip-input" style="height: 19px;" readonly>
+    <input type="button" value="快速定位" onclick="showIp()">
+
+    <br><br>
+
+    你与大城市距离：
+    <span id="nearcity"></span>
+
+</div>
+
+<script>
+    function showIp() {
+        var ipinput = document.getElementById("ip-input");
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    console.log(position.coords.longitude);
+                    console.log(position.coords.latitude);
+
+                    ipinput.value = position.coords.longitude + "," + position.coords.latitude;
+
+                    showNear(position.coords.longitude, position.coords.latitude);
+                },
+                function (e) {
+                    alert("请先在设置中允许浏览器获取地理位置！");
+                    throw(e.message);
+                }
+            )
+        }
+    }
+
+    function showNear(longitude, latitude) {
+
+        $.post('/range', {
+            lng: longitude,
+            lat: latitude
+        }, function (res) {
+            var html = "";
+
+            res.forEach(e => {
+                html += (e.name + "->" + e.distance + "公里、")
+            })
+            $("#nearcity").text(html);
+        });
+    }
+</script>
+</body>
+</html>
